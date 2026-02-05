@@ -6,14 +6,14 @@ from rest_framework.permissions import IsAuthenticated
 
 from .models import Review
 from .serializers import ReviewSerializer, ReviewDecisionSerializer
-from permissions.constants import Roles
+from permissions.rbac import IsAdminOrReviewer
 from audit.services import log_event
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAdminOrReviewer]
 
     def get_queryset(self):
         return Review.objects.filter(org=self.request.user.org)
@@ -45,18 +45,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
                 review = Review.objects.get(assessment__id=pk, org=self.request.user.org)
             except Review.DoesNotExist:
                 return Response({"detail": "Review not found"}, status=status.HTTP_404_NOT_FOUND)
-        
-        # Check permission: only reviewer/admin can decide
-        if request.user.role not in [Roles.REVIEWER, Roles.ADMIN]:
-            raise PermissionDenied("Only reviewers/admins can make review decisions")
-        
-        # Default decision to 'approved' when none provided — convenient shortcut
-        data = request.data.copy() if hasattr(request, "data") else {}
-        if not data:
-            data = {"decision": "approved"}
-        # Normalize decision values to be case-insensitive and accept common synonyms
-        if 'decision' in data and isinstance(data['decision'], str):
-            val = data['decision'].strip().lower()
             if val in ('approve', 'accepted', 'accept'):
                 val = 'approved'
             if val in ('decline', 'deny'):

@@ -6,13 +6,13 @@ from rest_framework import status
 from rest_framework.decorators import action
 from .models import Template, TemplateVersion
 from .serializers import TemplateSerializer, TemplateVersionSerializer
-from permissions.constants import Roles
+from permissions.rbac import CanCreateTemplate, CanCreateTemplateVersion
 from audit.services import log_event
 
 
 class TemplateViewSet(viewsets.ModelViewSet):
     serializer_class = TemplateSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, CanCreateTemplate]
 
     def get_queryset(self):
         user = getattr(self.request, "user", None)
@@ -24,10 +24,6 @@ class TemplateViewSet(viewsets.ModelViewSet):
         user = getattr(self.request, "user", None)
         if not user or not user.is_authenticated:
             raise PermissionDenied("Authentication required")
-
-        # Require ADMIN role to create templates
-        if getattr(user, "role", None) != Roles.ADMIN:
-            raise PermissionDenied("Only ADMIN users can create templates")
 
         org = getattr(user, "org", None)
         if not org:
@@ -43,7 +39,7 @@ class TemplateViewSet(viewsets.ModelViewSet):
 
 class TemplateVersionViewSet(viewsets.ModelViewSet):
     serializer_class = TemplateVersionSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, CanCreateTemplateVersion]
 
     def get_queryset(self):
         user = getattr(self.request, "user", None)

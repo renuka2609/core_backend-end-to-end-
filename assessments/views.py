@@ -8,13 +8,18 @@ from django.shortcuts import get_object_or_404
 
 from .models import Assessment
 from .serializers import AssessmentSerializer
-from permissions.constants import Roles
+from permissions.rbac import CanSubmitAssessment, CanReviewAssessment, CanApproveAssessment
 from audit.services import log_event
 
 
 class AssessmentViewSet(viewsets.ModelViewSet):
     serializer_class = AssessmentSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [
+        IsAuthenticated, 
+        CanSubmitAssessment, 
+        CanReviewAssessment, 
+        CanApproveAssessment
+    ]
 
     def get_queryset(self):
         """
@@ -53,10 +58,6 @@ class AssessmentViewSet(viewsets.ModelViewSet):
         assessment = self.get_object()
         user = request.user
         
-        # Check permission: only vendor can submit
-        if user.role != Roles.VENDOR:
-            raise PermissionDenied("Only vendors can submit assessments")
-        
         # Validate status transition
         is_valid, error_msg = assessment.can_transition_to(Assessment.STATUS_SUBMITTED)
         if not is_valid:
@@ -93,10 +94,6 @@ class AssessmentViewSet(viewsets.ModelViewSet):
         """
         assessment = self.get_object()
         user = request.user
-        
-        # Check permission: only reviewer/admin can review
-        if user.role not in [Roles.REVIEWER, Roles.ADMIN]:
-            raise PermissionDenied("Only reviewers or admins can review assessments")
         
         # Validate status transition
         is_valid, error_msg = assessment.can_transition_to(Assessment.STATUS_REVIEWED)
@@ -135,10 +132,6 @@ class AssessmentViewSet(viewsets.ModelViewSet):
         assessment = self.get_object()
         user = request.user
         
-        # Check permission: only admin can approve
-        if user.role != Roles.ADMIN:
-            raise PermissionDenied("Only admins can approve assessments")
-        
         # Validate status transition
         is_valid, error_msg = assessment.can_transition_to(Assessment.STATUS_APPROVED)
         if not is_valid:
@@ -167,4 +160,3 @@ class AssessmentViewSet(viewsets.ModelViewSet):
             AssessmentSerializer(assessment).data,
             status=status.HTTP_200_OK
         )
-

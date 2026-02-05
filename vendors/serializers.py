@@ -5,7 +5,7 @@ class VendorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vendor
         fields = "__all__"
-        read_only_fields = ["id"]
+        read_only_fields = ["id", "org"]
 
     def create(self, validated_data):
         request = self.context.get("request")
