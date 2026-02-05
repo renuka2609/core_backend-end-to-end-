@@ -6,7 +6,7 @@ This script sets up the database with test data for full workflow validation.
 Run this to reproduce the P0-ready state.
 
 STEPS FOR QA:
-1. Activate Python environment: .venv\Scripts\activate.ps1
+1. Activate Python environment: .venv/Scripts/activate.ps1
 2. Run: python seed_p0_ready.py
 3. Start server: python manage.py runserver
 4. Validate endpoints using the test list at the end of this file

@@ -46,7 +46,11 @@ class CanSubmitAssessment(BasePermission):
     """Only vendors can submit assessments"""
     def has_permission(self, request, view):
         if view.action == 'submit':
-            return request.user.role == Roles.VENDOR
+            if getattr(request.user, 'role', None) != Roles.VENDOR:
+                # Provide a helpful message for denied permissions
+                self.message = "Only users with role 'VENDOR' can submit assessments"
+                return False
+            return True
         return True
 
 
@@ -54,7 +58,10 @@ class CanReviewAssessment(BasePermission):
     """Only reviewers and admins can review assessments"""
     def has_permission(self, request, view):
         if view.action == 'review':
-            return request.user.role in [Roles.REVIEWER, Roles.ADMIN]
+            if getattr(request.user, 'role', None) not in [Roles.REVIEWER, Roles.ADMIN]:
+                self.message = "Only users with role 'REVIEWER' or 'ADMIN' can review assessments"
+                return False
+            return True
         return True
 
 
@@ -62,7 +69,10 @@ class CanApproveAssessment(BasePermission):
     """Only admins can approve assessments"""
     def has_permission(self, request, view):
         if view.action == 'approve':
-            return request.user.role == Roles.ADMIN
+            if getattr(request.user, 'role', None) != Roles.ADMIN:
+                self.message = "Only users with role 'ADMIN' can approve assessments"
+                return False
+            return True
         return True
 
 

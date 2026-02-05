@@ -45,11 +45,15 @@ class ReviewViewSet(viewsets.ModelViewSet):
                 review = Review.objects.get(assessment__id=pk, org=self.request.user.org)
             except Review.DoesNotExist:
                 return Response({"detail": "Review not found"}, status=status.HTTP_404_NOT_FOUND)
-            if val in ('approve', 'accepted', 'accept'):
-                val = 'approved'
-            if val in ('decline', 'deny'):
-                val = 'rejected'
-            data['decision'] = val
+        
+        # Extract and normalize decision value from request
+        data = dict(request.data)
+        val = data.get('decision', '').lower()
+        if val in ('approve', 'accepted', 'accept'):
+            val = 'approved'
+        if val in ('decline', 'deny'):
+            val = 'rejected'
+        data['decision'] = val
 
         # Validate input - provide helpful error message if validation fails
         serializer = ReviewDecisionSerializer(data=data)

@@ -23,14 +23,14 @@ def custom_exception_handler(exc, context):
     
     if response is None:
         # Unhandled exception - log it and return a generic error response
-        logger.exception(f"Unhandled exception: {exc}", exc_info=exc)
-        error_msg = str(exc.__class__.__name__) if settings.DEBUG else "Internal server error"
+        logger.exception("Unhandled exception: %s", exc, exc_info=True)
+        error_msg = str(exc.__class__.__name__) if getattr(settings, "DEBUG", False) else "Internal server error"
         return Response(
             {
                 "detail": "Internal server error",
-                "error": error_msg
+                "error": error_msg,
             },
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
     
     # If response has been created, ensure it's JSON format
