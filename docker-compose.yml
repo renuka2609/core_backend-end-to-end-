@@ -1,0 +1,9 @@
+version: "3.9"
+
+services:
+
+  scoring-service:
+    image: vrm-scoring-engine:latest
+    container_name: scoring-service
+    ports:
+      - "8001:8001"

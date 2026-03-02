@@ -1,7 +1,7 @@
-from .models import AuditLog
+from .models import AuditEvent
 
 
-def log_event(user, action, object_id=None, metadata=None):
+def log_event(user, action, entity_type, entity_id=None, description=None):
     """
     Log an audit event
     
@@ -18,14 +18,15 @@ def log_event(user, action, object_id=None, metadata=None):
     
     if not org:
         # Don't fail if org is missing, but log it
-        print(f"Warning: Audit log for action '{action}' has no org")
+        print(f"Warning: Audit event for action '{action}' has no org")
     
-    return AuditLog.objects.create(
-        user=user,
-        action=action,
-        object_id=object_id,
-        org=org,
-        metadata=metadata or {}
-    )
+    AuditEvent.objects.create(
+    user=user,
+    action=action,
+    entity_type=entity_type,
+    entity_id=entity_id,
+    description=description
+)
+AuditLog = AuditEvent
 
 

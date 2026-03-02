@@ -7,9 +7,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY
 SECRET_KEY = 'django-insecure-change-this-key'
 
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['*', 'testserver']
+
+ALLOWED_HOSTS = ['*']
 
 
 # APPLICATIONS
@@ -129,9 +130,17 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # DEFAULT PK
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-    'EXCEPTION_HANDLER': 'config.exceptions.custom_exception_handler',
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+    ],
+
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
 }
+
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Core Backend API',
     'DESCRIPTION': 'API documentation',

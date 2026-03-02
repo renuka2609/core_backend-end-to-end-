@@ -28,6 +28,9 @@ class Assessment(models.Model):
 
     org = models.ForeignKey(Organization, on_delete=models.CASCADE)
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
+    score = models.FloatField(null=True, blank=True)
+    risk_level = models.CharField(max_length=50, null=True, blank=True)
+
     template = models.ForeignKey(Template, on_delete=models.PROTECT)
     status = models.CharField(max_length=20, choices=STATUS, default=STATUS_ASSIGNED)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)

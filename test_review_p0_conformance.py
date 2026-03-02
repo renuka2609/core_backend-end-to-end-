@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+exit#!/usr/bin/env python
 """
 Comprehensive test demonstrating Review module fixes for P0 conformance.
 
