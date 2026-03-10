@@ -6,15 +6,14 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Assessment
 from .serializers import AssessmentSerializer
 from permissions.rbac import IsAdminOrReviewer, IsVendor
+from permissions.tenant_guard import TenantAwareQueryGuardMixin
 
 
-class AssessmentViewSet(viewsets.ModelViewSet):
+class AssessmentViewSet(TenantAwareQueryGuardMixin, viewsets.ModelViewSet):
     queryset = Assessment.objects.all()
     serializer_class = AssessmentSerializer
     permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return Assessment.objects.filter(org=self.request.user.org)
+    tenant_filter_field = 'org'
 
     @action(detail=True, methods=["post"], permission_classes=[IsVendor])
     def submit(self, request, pk=None):

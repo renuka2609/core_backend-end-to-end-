@@ -8,14 +8,13 @@ from .serializers import RemediationSerializer
 
 from audit.services import log_event
 from services.scoring_client import trigger_scoring
+from permissions.tenant_guard import TenantAwareQueryGuardMixin
 
 
-class RemediationViewSet(viewsets.ModelViewSet):
+class RemediationViewSet(TenantAwareQueryGuardMixin, viewsets.ModelViewSet):
     queryset = Remediation.objects.all()
     serializer_class = RemediationSerializer
-
-    def get_queryset(self):
-        return Remediation.objects.filter(org_id=self.request.user.org_id)
+    tenant_filter_field = 'org_id'
 
     def perform_create(self, serializer):
         obj = serializer.save(org_id=self.request.user.org_id)

@@ -4,17 +4,15 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Evidence
 from .serializers import EvidenceSerializer
 from audit.services import log_event
+from permissions.tenant_guard import TenantAwareQueryGuardMixin
 
 
-class EvidenceViewSet(ModelViewSet):
+class EvidenceViewSet(TenantAwareQueryGuardMixin, ModelViewSet):
     queryset = Evidence.objects.all()
     serializer_class = EvidenceSerializer
     permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        """Only show evidence for user's org"""
-        user = self.request.user
-        return Evidence.objects.filter(assessment__org=user.org)
+    tenant_filter_field = 'assessment__org'
+    tenant_lookup_path = 'assessment__org'
 
     def perform_create(self, serializer):
         """Log evidence creation"""

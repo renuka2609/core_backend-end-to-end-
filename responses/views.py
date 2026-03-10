@@ -8,17 +8,15 @@ from django.utils import timezone
 from .models import Response
 from .serializers import ResponseSerializer
 from audit.services import log_event
+from permissions.tenant_guard import TenantAwareQueryGuardMixin
 
 
-class ResponseViewSet(ModelViewSet):
+class ResponseViewSet(TenantAwareQueryGuardMixin, ModelViewSet):
     queryset = Response.objects.all()
     serializer_class = ResponseSerializer
     permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        """Only show responses for user's org"""
-        user = self.request.user
-        return Response.objects.filter(assessment__org=user.org)
+    tenant_filter_field = 'assessment__org'
+    tenant_lookup_path = 'assessment__org'
 
     def perform_create(self, serializer):
         """Log response creation"""
