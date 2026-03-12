@@ -1,90 +1,36 @@
-from rest_framework.permissions import BasePermission
+"""
+Consolidated RBAC Permission Classes
 
+This module re-exports the unified permission classes from rbac_policy.
+All permission logic is now centralized in rbac_policy.py to avoid duplication.
 
-class IsAdmin(BasePermission):
-    def has_permission(self, request, view):
-        return (
-            request.user.is_authenticated and
-            request.user.role.lower() == "admin"
-        )
+For the central policy matrix and role definitions, see rbac_policy.py.
+"""
 
-from rest_framework.permissions import BasePermission
+from permissions.rbac_policy import (
+    IsAdmin,
+    IsReviewer,
+    IsVendor,
+    IsAdminOrReviewer,
+    IsAuthenticated,
+    WorkflowActionPermission,
+    RoleType,
+    WorkflowAction,
+    RBACPolicyHelper,
+    RBAC_POLICY_MATRIX,
+    require_action,
+)
 
-
-class IsAdmin(BasePermission):
-    """
-    Allows access only to Admin users.
-    """
-
-    def has_permission(self, request, view):
-        user = request.user
-
-        if not user or not user.is_authenticated:
-            return False
-
-        # Superuser always allowed
-        if user.is_superuser:
-            return True
-
-        # Check group
-        return user.groups.filter(name="Admin").exists()
-
-
-class IsReviewer(BasePermission):
-    """
-    Allows access to Reviewer and Admin.
-    """
-
-    def has_permission(self, request, view):
-        user = request.user
-
-        if not user or not user.is_authenticated:
-            return False
-
-        if user.is_superuser:
-            return True
-
-        if user.groups.filter(name="Admin").exists():
-            return True
-
-        return user.groups.filter(name="Reviewer").exists()
-
-
-class IsVendor(BasePermission):
-    """
-    Allows access only to Vendor.
-    """
-
-    def has_permission(self, request, view):
-        user = request.user
-
-        if not user or not user.is_authenticated:
-            return False
-
-        if user.is_superuser:
-            return True
-
-        return user.groups.filter(name="Vendor").exists()
-
-class IsReviewer(BasePermission):
-    def has_permission(self, request, view):
-        return (
-            request.user.is_authenticated and
-            request.user.role.lower() == "reviewer"
-        )
-
-
-class IsVendor(BasePermission):
-    def has_permission(self, request, view):
-        return (
-            request.user.is_authenticated and
-            request.user.role.lower() == "vendor"
-        )
-
-
-class IsAdminOrReviewer(BasePermission):
-    def has_permission(self, request, view):
-        return (
-            request.user.is_authenticated and
-            request.user.role.lower() in ["admin", "reviewer"]
-        )
+__all__ = [
+    "IsAdmin",
+    "IsReviewer",
+    "IsVendor",
+    "IsAdminOrReviewer",
+    "IsAuthenticated",
+    "WorkflowActionPermission",
+    "RoleType",
+    "WorkflowAction",
+    "RBACPolicyHelper",
+    "RBAC_POLICY_MATRIX",
+    "require_action",
+]

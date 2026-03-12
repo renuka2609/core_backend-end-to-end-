@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from accounts.models import Tenant
 from orgs.models import Organization
 from vendors.models import Vendor
 from templates.models import Template
@@ -10,20 +11,23 @@ class Assessment(models.Model):
     STATUS_SUBMITTED = "submitted"
     STATUS_REVIEWED = "reviewed"
     STATUS_APPROVED = "approved"
+    STATUS_REMEDIATION = "remediation"
     
     STATUS = [
         (STATUS_ASSIGNED, "Assigned"),
         (STATUS_SUBMITTED, "Submitted"),
         (STATUS_REVIEWED, "Reviewed"),
         (STATUS_APPROVED, "Approved"),
+        (STATUS_REMEDIATION, "Remediation"),
     ]
     
-    # Valid state transitions
+    # Valid state transitions - strict, immutable state machine
     VALID_TRANSITIONS = {
-        STATUS_ASSIGNED: [STATUS_SUBMITTED],  # Vendor submits
-        STATUS_SUBMITTED: [STATUS_REVIEWED],  # Reviewer reviews
-        STATUS_REVIEWED: [STATUS_APPROVED],   # Admin approves
-        STATUS_APPROVED: [],  # Final state
+        STATUS_ASSIGNED: [STATUS_SUBMITTED],      # Vendor submits
+        STATUS_SUBMITTED: [STATUS_REVIEWED],      # Reviewer reviews
+        STATUS_REVIEWED: [STATUS_APPROVED, STATUS_REMEDIATION],  # Approved or needs remediation
+        STATUS_APPROVED: [],                       # Final state
+        STATUS_REMEDIATION: [STATUS_REVIEWED],    # Resubmitted after remediation
     }
 
     org = models.ForeignKey(Organization, on_delete=models.CASCADE)
@@ -76,3 +80,6 @@ class Assessment(models.Model):
         super().save(*args, **kwargs)
 
 
+class Vendor(models.Model):
+    name = models.CharField(max_length=255)
+    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)

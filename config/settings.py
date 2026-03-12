@@ -1,4 +1,5 @@
 from pathlib import Path
+from datetime import timedelta
 
 # BASE DIR
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,9 +26,12 @@ INSTALLED_APPS = [
     'rest_framework',        # ✅ ADD
     'drf_spectacular',
     'orgs.apps.OrgsConfig',
+    'rest_framework.authtoken',
+    'rest_framework_simplejwt.token_blacklist',
 
     # Core / base
     'users',
+    'accounts',
 
     # Main workflow apps
     'vendors',
@@ -53,6 +57,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'core_backend.middleware.tenant_middleware.TenantMiddleware',
+    # R-08: Input validation and error handling
+    'config.middleware.InputValidationMiddleware',
+    # R-09: Security headers and rate limiting
+    'config.security.SecurityHeadersMiddleware',
+    'config.security.RateLimitMiddleware',
 ]
 
 
@@ -113,6 +123,7 @@ AUTH_USER_MODEL = 'users.User'
 
 
 # LANGUAGE & TIME
+
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'Asia/Kolkata'
@@ -139,6 +150,20 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    # R-08: Custom exception handler for safe error responses
+    'EXCEPTION_HANDLER': 'config.middleware.SafeExceptionHandler.exception_handler',
+    # R-09: Rate limiting and throttling
+    'DEFAULT_THROTTLE_CLASSES': [
+        'config.security.UserRateLimitThrottle',
+        'config.security.IPRateLimitThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '100/hour',
+        'anon': '50/hour',
+    },
 }
 
 SPECTACULAR_SETTINGS = {
@@ -146,4 +171,57 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'API documentation',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+}
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+}
+
+# CACHING (for rate limiting and brute-force defense)
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
+
+# LOGGING (for audit and security)
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{levelname}] {asctime} {name} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': BASE_DIR / 'logs' / 'security.log',
+            'maxBytes': 1024 * 1024 * 10,  # 10MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'config.middleware': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+        },
+        'config.security': {
+            'handlers': ['console', 'file'],
+            'level': 'WARNING',
+        },
+        'audit': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+        },
+    },
 }
