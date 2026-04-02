@@ -37,7 +37,7 @@ class AssessmentViewSet(TenantAwareQueryGuardMixin, viewsets.ModelViewSet):
             updated = AssessmentStateTransitionService.transition(
                 assessment=assessment,
                 new_status=target_status,
-                actor_user=request.user,
+                actor_user=self.request.user,
                 metadata=request_metadata
             )
             return Response({

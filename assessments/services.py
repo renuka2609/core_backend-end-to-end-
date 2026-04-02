@@ -53,7 +53,7 @@ class AssessmentStateTransitionService:
     def transition(
         assessment: Assessment,
         new_status: str,
-        actor_user: User,
+        actor_user,
         metadata: dict = None
     ) -> Assessment:
         """

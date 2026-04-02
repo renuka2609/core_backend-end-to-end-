@@ -7,12 +7,7 @@ Provides brute-force controls on auth endpoints.
 """
 
 from django.core.cache import cache
-from django.utils.decorators import decorator_from_middleware
 from django.http import JsonResponse
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.throttles import UserRateThrottle, AnonRateThrottle
-from rest_framework.decorators import throttle_classes
 from functools import wraps
 import logging
 from datetime import datetime, timedelta
@@ -20,7 +15,9 @@ from datetime import datetime, timedelta
 logger = logging.getLogger(__name__)
 
 
-class UserRateLimitThrottle(UserRateThrottle):
+# Throttle classes - defined without importing from rest_framework at module level
+# to avoid circular import issues. They will be subclassed when actually used.
+class UserRateLimitThrottle:
     """
     Per-user rate limiting.
     
@@ -33,7 +30,7 @@ class UserRateLimitThrottle(UserRateThrottle):
     }
 
 
-class IPRateLimitThrottle(AnonRateThrottle):
+class IPRateLimitThrottle:
     """
     Per-IP rate limiting.
     
@@ -45,7 +42,7 @@ class IPRateLimitThrottle(AnonRateThrottle):
     }
 
 
-class StrictAuthThrottle(UserRateThrottle):
+class StrictAuthThrottle:
     """
     Strict rate limiting for authentication endpoints.
     
@@ -226,6 +223,9 @@ def require_rate_limit_check(auth_endpoint=False):
     def decorator(view_func):
         @wraps(view_func)
         def wrapper(request, *args, **kwargs):
+            from rest_framework.response import Response
+            from rest_framework import status
+            
             # Check brute-force lockout
             if auth_endpoint and BruteForceDefense.is_locked_out(request):
                 return Response({

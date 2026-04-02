@@ -1,17 +1,11 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import authenticate
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
-from drf_spectacular.utils import extend_schema
 from .serializers import LoginSerializer
 
-@extend_schema(
-    request=LoginSerializer,
-    responses=LoginSerializer
-)
 
 class LoginView(APIView):
     permission_classes = [AllowAny]
@@ -37,6 +31,8 @@ class LoginView(APIView):
             "role": user.role,
             "org_id": str(user.org_id)
         })
+
+
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 

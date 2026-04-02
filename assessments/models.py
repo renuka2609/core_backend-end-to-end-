@@ -78,8 +78,3 @@ class Assessment(models.Model):
                 if not is_valid:
                     raise ValidationError(error_msg)
         super().save(*args, **kwargs)
-
-
-class Vendor(models.Model):
-    name = models.CharField(max_length=255)
-    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)

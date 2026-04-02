@@ -11,8 +11,8 @@ Implements schema validation at edge layer with consistent error envelopes.
 from typing import Any, Dict
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.exceptions import ValidationError, DjangoValidationError
-from django.core.exceptions import ValidationError as DjangoValidationErrorClass
+from rest_framework.exceptions import ValidationError as DRFValidationError
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.http import JsonResponse
 import logging
 
@@ -100,7 +100,7 @@ class InputValidationMiddleware:
         try:
             response = self.get_response(request)
             return response
-        except DjangoValidationErrorClass as e:
+        except DjangoValidationError as e:
             # Django validation errors
             logger.warning(f"Validation error on {request.path}: {e}")
             return JsonResponse(
@@ -111,7 +111,7 @@ class InputValidationMiddleware:
                 ),
                 status=status.HTTP_400_BAD_REQUEST
             )
-        except ValidationError as e:
+        except DRFValidationError as e:
             # DRF validation errors
             logger.warning(f"DRF validation error on {request.path}: {e.detail}")
             errors = e.detail if isinstance(e.detail, dict) else {"error": str(e.detail)}
@@ -137,7 +137,7 @@ class InputValidationMiddleware:
     
     def process_exception(self, request, exception):
         """Process exceptions - DRF already handles most, but this catches others."""
-        if isinstance(exception, (ValidationError, DjangoValidationErrorClass)):
+        if isinstance(exception, (DRFValidationError, DjangoValidationError)):
             logger.warning(f"Validation error: {exception}")
             return JsonResponse(
                 StandardErrorEnvelope.format_error(

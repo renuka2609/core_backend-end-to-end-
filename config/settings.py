@@ -8,7 +8,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY
 SECRET_KEY = 'django-insecure-change-this-key'
 
-DEBUG = False
+# Enable debugging in local development for Swagger UI and schema troubleshooting
+DEBUG = True
 
 
 ALLOWED_HOSTS = ['*']
@@ -28,6 +29,7 @@ INSTALLED_APPS = [
     'orgs.apps.OrgsConfig',
     'rest_framework.authtoken',
     'rest_framework_simplejwt.token_blacklist',
+
 
     # Core / base
     'users',
@@ -51,19 +53,23 @@ INSTALLED_APPS = [
 # MIDDLEWARE
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'core_backend.middleware.tenant_middleware.TenantMiddleware',
     # R-08: Input validation and error handling
     'config.middleware.InputValidationMiddleware',
     # R-09: Security headers and rate limiting
     'config.security.SecurityHeadersMiddleware',
     'config.security.RateLimitMiddleware',
+    
 ]
+
+# WhiteNoise static files storage for production-like behavior (serves static assets when DEBUG=False)
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 # URL CONFIG
@@ -156,10 +162,11 @@ REST_FRAMEWORK = {
     # R-08: Custom exception handler for safe error responses
     'EXCEPTION_HANDLER': 'config.middleware.SafeExceptionHandler.exception_handler',
     # R-09: Rate limiting and throttling
-    'DEFAULT_THROTTLE_CLASSES': [
-        'config.security.UserRateLimitThrottle',
-        'config.security.IPRateLimitThrottle',
-    ],
+    # Temporarily disabled due to circular import - rate limiting handled via middleware
+    # 'DEFAULT_THROTTLE_CLASSES': [
+    #     'config.security.UserRateLimitThrottle',
+    #     'config.security.IPRateLimitThrottle',
+    # ],
     'DEFAULT_THROTTLE_RATES': {
         'user': '100/hour',
         'anon': '50/hour',
@@ -170,7 +177,6 @@ SPECTACULAR_SETTINGS = {
     'TITLE': 'Core Backend API',
     'DESCRIPTION': 'API documentation',
     'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': False,
 }
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),

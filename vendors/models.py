@@ -15,7 +15,6 @@ class Vendor(models.Model):
     
     name = models.CharField(max_length=255)
     email = models.EmailField(null=True, blank=True)
-    tenant_id = models.CharField(max_length=100, null=True, blank=True)
     
     industry = models.CharField(max_length=255, blank=True)
     tier = models.CharField(max_length=50, blank=True)
