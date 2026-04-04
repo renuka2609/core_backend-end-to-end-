@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
 from .models import Remediation
 from .serializers import RemediationSerializer
@@ -9,14 +10,27 @@ from .serializers import RemediationSerializer
 from audit.services import log_event
 from services.scoring_client import trigger_scoring
 from permissions.tenant_guard import TenantAwareQueryGuardMixin
+from permissions.rbac_policy import (
+    WorkflowActionPermission,
+    WorkflowAction,
+    IsAdminOrReviewer,
+    IsVendor,
+    RBACPolicyHelper,
+)
 
 
 class RemediationViewSet(TenantAwareQueryGuardMixin, viewsets.ModelViewSet):
     queryset = Remediation.objects.all()
     serializer_class = RemediationSerializer
+    permission_classes = [IsAuthenticated, IsAdminOrReviewer]  # FIXED: Critical - was missing!
     tenant_filter_field = 'org_id'
 
     def perform_create(self, serializer):
+        """Create remediation with permission check."""
+        WorkflowActionPermission.check_action_or_raise(
+            self.request.user, WorkflowAction.REMEDIATION_CREATE
+        )
+        
         obj = serializer.save(org_id=self.request.user.org_id)
 
         log_event(
@@ -26,8 +40,13 @@ class RemediationViewSet(TenantAwareQueryGuardMixin, viewsets.ModelViewSet):
         )
 
     # vendor responds
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, IsVendor])
     def respond(self, request, pk=None):
+        # Check workflow action permission
+        WorkflowActionPermission.check_action_or_raise(
+            request.user, WorkflowAction.REMEDIATION_RESPOND
+        )
+        
         obj = self.get_object()
 
         if obj.status != "open":
@@ -46,8 +65,13 @@ class RemediationViewSet(TenantAwareQueryGuardMixin, viewsets.ModelViewSet):
         return Response({"status": "responded"})
 
     # reviewer closes
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated, IsAdminOrReviewer])
     def close(self, request, pk=None):
+        # Check workflow action permission
+        WorkflowActionPermission.check_action_or_raise(
+            request.user, WorkflowAction.REMEDIATION_CLOSE
+        )
+        
         obj = self.get_object()
 
         if obj.status != "responded":
