@@ -240,6 +240,17 @@ class IsAdminOrReviewer(BasePermission):
         return role in {RoleType.ADMIN, RoleType.REVIEWER}
 
 
+class IsAdminOrVendor(BasePermission):
+    """Allow access to Admin or Vendor."""
+    
+    def has_permission(self, request, view):
+        user = request.user
+        if not user or not user.is_authenticated:
+            return False
+        role = RBACPolicyHelper.get_user_role(user)
+        return role in {RoleType.ADMIN, RoleType.VENDOR}
+
+
 class IsAuthenticated(BasePermission):
     """Allow access to any authenticated user."""
     
