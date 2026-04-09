@@ -2,6 +2,7 @@ from django.urls import path, include
 from django.http import JsonResponse
 
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from rest_framework.permissions import AllowAny
 
 def root_view(request):
     return JsonResponse({
@@ -28,6 +29,6 @@ urlpatterns = [
     path("api/vendors/", include("vendors.urls")),
     path("api/templates/", include("templates.urls")),
     path("api/dashboard/", include("dashboard.urls")),
-    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-    path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema")),
+    path("api/schema/", SpectacularAPIView.as_view(permission_classes=[AllowAny]), name="schema"),
+    path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema", permission_classes=[AllowAny])),
 ]

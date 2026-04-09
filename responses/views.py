@@ -43,7 +43,8 @@ class ResponseViewSet(TenantAwareQueryGuardMixin, ModelViewSet):
         log_event(
             user=self.request.user,
             action="response_created",
-            object_id=response.id,
+            resource_type="response",
+            resource_id=response.id,
             metadata={
                 "assessment_id": response.assessment.id,
                 "question_id": str(response.question_id)
@@ -60,7 +61,8 @@ class ResponseViewSet(TenantAwareQueryGuardMixin, ModelViewSet):
         log_event(
             user=self.request.user,
             action="response_updated",
-            object_id=response.id,
+            resource_type="response",
+            resource_id=response.id,
             metadata={
                 "assessment_id": response.assessment.id,
                 "question_id": str(response.question_id)
@@ -87,7 +89,8 @@ class ResponseViewSet(TenantAwareQueryGuardMixin, ModelViewSet):
         log_event(
             user=request.user,
             action="response_submitted",
-            object_id=obj.id,
+            resource_type="response",
+            resource_id=obj.id,
             metadata={
                 "assessment_id": obj.assessment.id,
                 "question_id": str(obj.question_id)

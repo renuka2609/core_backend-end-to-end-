@@ -130,8 +130,7 @@ class AssessmentViewSet(TenantAwareQueryGuardMixin, viewsets.ModelViewSet):
         assessment = self.get_object()
         response, resp_status = self._transition_assessment(
             assessment,
-            Assessment.STATUS_REMEDIATION,
+            Assessment.STATUS_REMEDIATING,
             request_metadata={"action": "request_remediation"}
         )
         return response, resp_status
-

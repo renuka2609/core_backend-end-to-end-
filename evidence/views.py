@@ -39,7 +39,8 @@ class EvidenceViewSet(TenantAwareQueryGuardMixin, ModelViewSet):
         log_event(
             user=self.request.user,
             action="evidence_created",
-            object_id=evidence.id,
+            resource_type="evidence",
+            resource_id=evidence.id,
             metadata={
                 "assessment_id": evidence.assessment.id,
                 "file_name": evidence.file.name if evidence.file else None
@@ -75,6 +76,7 @@ class EvidenceViewSet(TenantAwareQueryGuardMixin, ModelViewSet):
         log_event(
             user=self.request.user,
             action="evidence_deleted",
-            object_id=eid,
+            resource_type="evidence",
+            resource_id=eid,
             metadata={"assessment_id": assessment_id}
         )

@@ -1,32 +1,34 @@
 from .models import AuditEvent
 
 
-def log_event(user, action, entity_type, entity_id=None, description=None):
+def log_event(user, action, resource_type, resource_id=None, metadata=None):
     """
-    Log an audit event
-    
+    Log an audit event.
+
     Args:
         user: The user performing the action
-        action: The action being logged (e.g., 'create_assessment', 'submit_assessment')
-        object_id: The ID of the object being acted upon
+        action: The action being logged
+        resource_type: The type of resource affected
+        resource_id: The ID of the resource being acted upon
         metadata: Additional metadata about the action
-    
+
     Returns:
-        AuditLog: The created audit log entry
+        AuditEvent: The created audit log entry
     """
     org = getattr(user, "org", None)
-    
+
     if not org:
-        # Don't fail if org is missing, but log it
+        # Don't fail if org is missing, but log it for review
         print(f"Warning: Audit event for action '{action}' has no org")
-    
-    AuditEvent.objects.create(
-    user=user,
-    action=action,
-    entity_type=entity_type,
-    entity_id=entity_id,
-    description=description
-)
-AuditLog = AuditEvent
+
+    return AuditEvent.objects.create(
+        user=user,
+        org=org,
+        action=action,
+        resource_type=resource_type,
+        resource_id=resource_id,
+        metadata=metadata
+    )
+
 
 

@@ -11,23 +11,29 @@ class Assessment(models.Model):
     STATUS_SUBMITTED = "submitted"
     STATUS_REVIEWED = "reviewed"
     STATUS_APPROVED = "approved"
-    STATUS_REMEDIATION = "remediation"
+    STATUS_REMEDIATING = "remediating"
+    STATUS_CLOSED = "closed"
+    STATUS_RENEWED = "renewed"
     
     STATUS = [
         (STATUS_ASSIGNED, "Assigned"),
         (STATUS_SUBMITTED, "Submitted"),
         (STATUS_REVIEWED, "Reviewed"),
         (STATUS_APPROVED, "Approved"),
-        (STATUS_REMEDIATION, "Remediation"),
+        (STATUS_REMEDIATING, "Remediating"),
+        (STATUS_CLOSED, "Closed"),
+        (STATUS_RENEWED, "Renewed"),
     ]
     
     # Valid state transitions - strict, immutable state machine
     VALID_TRANSITIONS = {
         STATUS_ASSIGNED: [STATUS_SUBMITTED],      # Vendor submits
         STATUS_SUBMITTED: [STATUS_REVIEWED],      # Reviewer reviews
-        STATUS_REVIEWED: [STATUS_APPROVED, STATUS_REMEDIATION],  # Approved or needs remediation
-        STATUS_APPROVED: [],                       # Final state
-        STATUS_REMEDIATION: [STATUS_REVIEWED],    # Resubmitted after remediation
+        STATUS_REVIEWED: [STATUS_APPROVED, STATUS_REMEDIATING],  # Approved or needs remediation
+        STATUS_APPROVED: [STATUS_CLOSED],         # Can be closed
+        STATUS_REMEDIATING: [STATUS_REVIEWED],    # Resubmitted after remediation
+        STATUS_CLOSED: [STATUS_RENEWED],          # Can be renewed
+        STATUS_RENEWED: [STATUS_ASSIGNED],        # Restart cycle
     }
 
     org = models.ForeignKey(Organization, on_delete=models.CASCADE)

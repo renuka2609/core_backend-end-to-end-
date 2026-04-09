@@ -53,6 +53,7 @@ INSTALLED_APPS = [
 # MIDDLEWARE
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'core.middleware.ErrorHandlerMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -151,6 +152,7 @@ REST_FRAMEWORK = {
 
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
+        "rest_framework.renderers.BrowsableAPIRenderer",
     ],
 
     "DEFAULT_PERMISSION_CLASSES": [
@@ -160,7 +162,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     # R-08: Custom exception handler for safe error responses
-    'EXCEPTION_HANDLER': 'config.middleware.SafeExceptionHandler.exception_handler',
+    'EXCEPTION_HANDLER': 'config.exceptions.custom_exception_handler',
     # R-09: Rate limiting and throttling
     # Temporarily disabled due to circular import - rate limiting handled via middleware
     # 'DEFAULT_THROTTLE_CLASSES': [
@@ -171,12 +173,25 @@ REST_FRAMEWORK = {
         'user': '100/hour',
         'anon': '50/hour',
     },
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
 }
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Core Backend API',
     'DESCRIPTION': 'API documentation',
     'VERSION': '1.0.0',
+    'SERVE_PUBLIC': True,
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.AllowAny'],
+    'SERVE_INCLUDE_SCHEMA': True,
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'presets': [
+            'swaggerUIBundle.presets.apis',
+            'swaggerUIBundle.SwaggerUIStandalonePreset',
+        ],
+        'layout': 'StandaloneLayout',
+    },
 }
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),

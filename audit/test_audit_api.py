@@ -43,6 +43,7 @@ class AuditEventAPITests(TestCase):
         # Create audit events
         self.event1 = AuditEvent.objects.create(
             user=self.user1,
+            org=self.org,
             action="assessment_created",
             resource_type="assessment",
             resource_id=1,
@@ -56,6 +57,7 @@ class AuditEventAPITests(TestCase):
         
         self.event2 = AuditEvent.objects.create(
             user=self.user1,
+            org=self.org,
             action="assessment_transitioned: assigned → submitted",
             resource_type="assessment",
             resource_id=1,
@@ -70,6 +72,7 @@ class AuditEventAPITests(TestCase):
         
         self.event3 = AuditEvent.objects.create(
             user=self.user2,
+            org=self.org,
             action="assessment_transitioned: submitted → reviewed",
             resource_type="assessment",
             resource_id=1,
@@ -279,7 +282,7 @@ class AuditEventAPITests(TestCase):
         )
         
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
-        self.assertIn('immutable', response.data['error'].lower())
+        self.assertIn('not allowed', response.data['detail'].lower())
     
     def test_immutability_delete_blocked(self):
         """Test that deleting audit events via API is blocked."""

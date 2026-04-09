@@ -121,16 +121,29 @@ print("-" * 90)
 from audit.services import log_event
 
 test_user = admin_user
-log_event(test_user, "create_assessment", test_assessment.id, {
-    "vendor_id": vendor.id,
-    "template_id": template.id,
-    "status": test_assessment.status
-})
+log_event(
+    test_user,
+    "create_assessment",
+    resource_type="assessment",
+    resource_id=test_assessment.id,
+    metadata={
+        "vendor_id": vendor.id,
+        "template_id": template.id,
+        "status": test_assessment.status
+    }
+)
 
-log_event(test_user, "submit_assessment", test_assessment.id, {
-    "previous_status": "assigned",
-    "new_status": "submitted"
-})
+log_event(
+    test_user,
+    "submit_assessment",
+    resource_type="assessment",
+    resource_id=test_assessment.id,
+    metadata={
+        "previous_status": "assigned",
+        "new_status": "submitted"
+    }
+)
+
 
 print(f"✓ Audit log entries created:")
 

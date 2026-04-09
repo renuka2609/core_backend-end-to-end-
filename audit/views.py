@@ -32,9 +32,9 @@ class AuditEventViewSet(viewsets.ReadOnlyModelViewSet):
     - Request metadata
     
     Immutable: Events cannot be modified or deleted after creation.
+    Filtered by organization: Users only see audit logs for their org.
     """
     
-    queryset = AuditEvent.objects.all().order_by('-created_at')
     serializer_class = AuditEventSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter]
@@ -42,6 +42,16 @@ class AuditEventViewSet(viewsets.ReadOnlyModelViewSet):
     ordering_fields = ['created_at', 'user', 'action']
     ordering = ['-created_at']
     search_fields = ['action', 'user__username', 'user__email']
+    
+    def get_queryset(self):
+        """Filter audit events by user's organization."""
+        user = self.request.user
+        user_org = getattr(user, 'org', None)
+        
+        if not user_org:
+            return AuditEvent.objects.none()
+        
+        return AuditEvent.objects.filter(org=user_org).order_by('-created_at')
     
     def list(self, request, *args, **kwargs):
         """
@@ -85,7 +95,7 @@ class AuditEventViewSet(viewsets.ReadOnlyModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        events = self.queryset.filter(
+        events = self.get_queryset().filter(
             resource_type=resource_type,
             resource_id=resource_id
         ).order_by('created_at')
@@ -124,7 +134,7 @@ class AuditEventViewSet(viewsets.ReadOnlyModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        events = self.queryset.filter(user_id=user_id).order_by('-created_at')
+        events = self.get_queryset().filter(user_id=user_id).order_by('-created_at')
         
         serializer = self.get_serializer(events, many=True)
         return Response({
@@ -165,7 +175,7 @@ class AuditEventViewSet(viewsets.ReadOnlyModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        events = self.queryset.filter(
+        events = self.get_queryset().filter(
             created_at__gte=start_date,
             created_at__lte=end_date
         ).order_by('created_at')

@@ -192,7 +192,7 @@ class AssessmentStateTransitionTests(TestCase):
         self.assertEqual(audit_event.resource_type, "assessment")
         self.assertEqual(audit_event.resource_id, self.assessment.id)
         
-        metadata = json.loads(audit_event.metadata)
+        metadata = audit_event.metadata
         self.assertEqual(metadata["old_value"], Assessment.STATUS_ASSIGNED)
         self.assertEqual(metadata["new_value"], Assessment.STATUS_SUBMITTED)
         self.assertEqual(metadata["reason"], "vendor_ready")

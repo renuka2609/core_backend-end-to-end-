@@ -38,6 +38,13 @@ class AuditEventSerializer(serializers.ModelSerializer):
     
     def get_user_details(self, obj):
         """Include user details for better audit readability."""
+        if not obj.user:
+            return {
+                'id': None,
+                'username': 'System',
+                'email': None,
+                'role': None,
+            }
         return {
             'id': obj.user.id,
             'username': obj.user.username,

@@ -1,6 +1,9 @@
 from django.db import models
 from django.conf import settings
+from orgs.models import Organization
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
 
 class AuditEvent(models.Model):
     """
@@ -12,12 +15,22 @@ class AuditEvent(models.Model):
     - resource tracking (type and id)
     - metadata (old/new values and context)
     - timestamp (auto)
+    - organization (for tenant isolation)
     """
     
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         help_text="User who performed the action"
+    )
+    org = models.ForeignKey(
+        Organization,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        help_text="Organization that owns this audit event"
     )
     action = models.CharField(
         max_length=255,
@@ -55,4 +68,14 @@ class AuditEvent(models.Model):
 
 
 # Backward compatibility alias
-AuditLog = AuditEvent
+class AuditLog(models.Model):
+    actor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    action = models.CharField(max_length=255)
+    resource = models.CharField(max_length=255)
+
+    old_value = models.JSONField(null=True, blank=True)
+    new_value = models.JSONField(null=True, blank=True)
+
+    request_meta = models.JSONField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)

@@ -95,8 +95,9 @@ class AssessmentStateTransitionService:
         
         AuditEvent.objects.create(
             user=actor_user,
+            org=assessment.org,
             action=f"assessment_transitioned: {old_status} → {new_status}",
-            metadata=json.dumps(audit_metadata),
+            metadata=audit_metadata,
             resource_type="assessment",
             resource_id=assessment.id,
         )

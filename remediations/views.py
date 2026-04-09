@@ -36,7 +36,12 @@ class RemediationViewSet(TenantAwareQueryGuardMixin, viewsets.ModelViewSet):
         log_event(
             user=self.request.user,
             action="remediation_created",
-            obj=obj
+            resource_type="remediation",
+            resource_id=obj.id,
+            metadata={
+                "assessment_id": obj.assessment_id,
+                "status": obj.status,
+            }
         )
 
     # vendor responds
@@ -59,7 +64,12 @@ class RemediationViewSet(TenantAwareQueryGuardMixin, viewsets.ModelViewSet):
         log_event(
             user=request.user,
             action="remediation_responded",
-            obj=obj
+            resource_type="remediation",
+            resource_id=obj.id,
+            metadata={
+                "assessment_id": obj.assessment_id,
+                "status": obj.status,
+            }
         )
 
         return Response({"status": "responded"})
@@ -85,7 +95,12 @@ class RemediationViewSet(TenantAwareQueryGuardMixin, viewsets.ModelViewSet):
         log_event(
             user=request.user,
             action="remediation_closed",
-            obj=obj
+            resource_type="remediation",
+            resource_id=obj.id,
+            metadata={
+                "assessment_id": obj.assessment_id,
+                "status": obj.status,
+            }
         )
 
         return Response({"status": "closed"})
