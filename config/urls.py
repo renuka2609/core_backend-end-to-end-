@@ -1,3 +1,4 @@
+# backend update
 from django.urls import path, include
 from django.http import JsonResponse
 from django.shortcuts import redirect
