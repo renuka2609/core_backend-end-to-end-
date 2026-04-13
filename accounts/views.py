@@ -9,6 +9,7 @@ from .serializers import LoginSerializer
 
 class LoginView(APIView):
     permission_classes = [AllowAny]
+    serializer_class = LoginSerializer
 
     def post(self, request):
         username = request.data.get("username")

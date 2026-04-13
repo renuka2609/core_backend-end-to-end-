@@ -22,21 +22,7 @@ class AuditEventSerializer(serializers.ModelSerializer):
     
     user_details = serializers.SerializerMethodField()
     
-    class Meta:
-        model = AuditEvent
-        fields = [
-            'id',
-            'user',
-            'user_details',
-            'action',
-            'resource_type',
-            'resource_id',
-            'metadata',
-            'created_at',
-        ]
-        read_only_fields = ['id', 'created_at']
-    
-    def get_user_details(self, obj):
+    def get_user_details(self, obj) -> dict:
         """Include user details for better audit readability."""
         if not obj.user:
             return {
@@ -51,3 +37,17 @@ class AuditEventSerializer(serializers.ModelSerializer):
             'email': obj.user.email,
             'role': getattr(obj.user, 'role', None),
         }
+    
+    class Meta:
+        model = AuditEvent
+        fields = [
+            'id',
+            'user',
+            'user_details',
+            'action',
+            'resource_type',
+            'resource_id',
+            'metadata',
+            'created_at',
+        ]
+        read_only_fields = ['id', 'created_at']

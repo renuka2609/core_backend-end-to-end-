@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',        # ✅ ADD
     'drf_spectacular',
+    'drf_spectacular_sidecar',
     'orgs.apps.OrgsConfig',
     'rest_framework.authtoken',
     'rest_framework_simplejwt.token_blacklist',
@@ -183,7 +184,8 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
     'SERVE_PUBLIC': True,
     'SERVE_PERMISSIONS': ['rest_framework.permissions.AllowAny'],
-    'SERVE_INCLUDE_SCHEMA': True,
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SWAGGER_UI_DIST': 'SIDECAR',
     'SWAGGER_UI_SETTINGS': {
         'deepLinking': True,
         'presets': [

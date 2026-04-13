@@ -68,14 +68,4 @@ class AuditEvent(models.Model):
 
 
 # Backward compatibility alias
-class AuditLog(models.Model):
-    actor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    action = models.CharField(max_length=255)
-    resource = models.CharField(max_length=255)
-
-    old_value = models.JSONField(null=True, blank=True)
-    new_value = models.JSONField(null=True, blank=True)
-
-    request_meta = models.JSONField(null=True, blank=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
+AuditLog = AuditEvent

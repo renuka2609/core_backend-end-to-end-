@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Core Backend API</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@3/swagger-ui.css">
+    <style>
+        html {
+            box-sizing: border-box;
+            overflow-y: scroll;
+        }
+        *,
+        *:after,
+        *:before {
+            box-sizing: inherit;
+        }
+        body {
+            background: #fafafa;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="swagger-ui"></div>
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@3/swagger-ui-bundle.js" charset="UTF-8"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@3/swagger-ui-standalone-preset.js" charset="UTF-8"></script>
+    <script>
+        try {
+            const ui = SwaggerUIBundle({
+                url: "/api/schema/",
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIBundle.SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "BaseLayout"
+            });
+            window.ui = ui;
+        } catch (e) {
+            console.error("Failed to initialize Swagger UI:", e);
+            document.body.innerHTML = "<h1>Error loading API documentation</h1><p>" + e.message + "</p>";
+        }
+    </script>
+</body>
+</html>

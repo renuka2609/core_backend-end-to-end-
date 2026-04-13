@@ -155,7 +155,11 @@ class SecurityHeadersMiddleware:
             response['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
         
         # Content Security Policy
-        response['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';"
+        if request.path.startswith('/api/docs'):
+            # Swagger UI needs to load inline scripts and styles
+            response['Content-Security-Policy'] = "default-src *; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: http: blob: data:; style-src 'self' 'unsafe-inline' https: http: blob: data:; img-src 'self' https: http: blob: data:; font-src 'self' https: http: blob: data:; connect-src 'self' https: http: blob: data:;"
+        else:
+            response['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';"
         
         # Referrer Policy
         response['Referrer-Policy'] = 'strict-origin-when-cross-origin'

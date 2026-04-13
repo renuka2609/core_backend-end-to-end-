@@ -1,5 +1,5 @@
 import urllib.request
-import json
+import yaml
 import sys
 
 try:
@@ -9,7 +9,7 @@ try:
     print(f"Status: {response.status}")
     print(f"Content length: {len(content)}")
     
-    data = json.loads(content)
+    data = yaml.safe_load(content)
     print(f"\nSchema keys: {list(data.keys())}")
     
     if 'paths' in data:

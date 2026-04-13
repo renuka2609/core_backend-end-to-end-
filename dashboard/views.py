@@ -11,6 +11,7 @@ from .serializers import DashboardStatsSerializer, ActivityFeedSerializer
 # Stats endpoint
 class DashboardStatsView(APIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = DashboardStatsSerializer
 
     def get(self, request):
         """Get dashboard stats filtered by user's organization and role."""
@@ -61,6 +62,7 @@ class DashboardStatsView(APIView):
 # Activity feed endpoint
 class DashboardActivityFeedView(APIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = ActivityFeedSerializer
 
     def get(self, request):
         """Get activity feed filtered by user's organization and role."""
